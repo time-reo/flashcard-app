@@ -41,7 +41,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function FlashcardWebPrototype() {
   const [cards, setCards] = useState(initialCards);
-  const [selectedCategory, setSelectedCategory] = useState<Category>("数学");
+  const [selectedCategory, setSelectedCategory] = useState<Category>("公共");
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Record<string, boolean>>({});
@@ -111,8 +111,8 @@ export default function FlashcardWebPrototype() {
     <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8">
       <div className="mx-auto max-w-3xl space-y-5">
         <header className="space-y-2 text-center">
-          <p className="text-sm font-medium text-slate-500">Webで共有できる単語学習カード</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">フラッシュカード</h1>
+          <p className="text-sm font-medium text-slate-500">フラッシュカード</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">テスト対策用</h1>
           <p className="text-slate-600">カードをクリックすると答えが表示されます。科目ごとに学習が可能です。</p>
         </header>
 

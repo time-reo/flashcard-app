@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Shuffle, ChevronLeft, ChevronRight, CheckCircle2, Upload, Search, Eye, Check } from "lucide-react";
+import { RotateCcw, Shuffle, ChevronLeft, ChevronRight, CheckCircle2, Upload, Search, Eye, Check, Sparkles } from "lucide-react";
 
 // 科目のリスト
-const CATEGORIES = ["数学", "公共", "家庭", "科人", "情１"] as const;
+const CATEGORIES = ["公共", "家庭", "数学", "科人", "情１"] as const;
 type Category = typeof CATEGORIES[number];
 
 // 初期カードデータ（各科目にサンプルを配置）
@@ -41,19 +41,23 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function FlashcardWebPrototype() {
   const [cards, setCards] = useState(initialCards);
+  // 初期カテゴリを「公共」に変更
   const [selectedCategory, setSelectedCategory] = useState<Category>("公共");
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Record<string, boolean>>({});
-  const [viewed, setViewed] = useState<Record<string, boolean>>({}); // 既出（閲覧済み）の状態管理
+  
+  // 閲覧回数を記録するステート（文字列：回数）
+  const [viewedCount, setViewedCount] = useState<Record<string, number>>({});
+  // 直前に見たカードを記録して、連続でカウントアップするのを防ぐ
+  const lastViewed = useRef<string | null>(null);
+  
   const [query, setQuery] = useState("");
 
-  // 1. まず選択された科目のカードだけに絞り込む
   const categoryCards = useMemo(() => {
     return cards.filter((card) => card.category === selectedCategory);
   }, [cards, selectedCategory]);
 
-  // 2. その中から検索クエリでさらに絞り込む
   const filteredCards = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return categoryCards;
@@ -65,17 +69,23 @@ export default function FlashcardWebPrototype() {
   const safeIndex = Math.min(index, Math.max(filteredCards.length - 1, 0));
   const current = filteredCards[safeIndex];
 
-  // 全カードのうち、現在の科目で覚えた数をカウント
   const knownCount = useMemo(() => {
     return categoryCards.filter((card) => known[card.front]).length;
   }, [categoryCards, known]);
 
-  // カードが表示されたら「既出（閲覧済み）」に記録する
+  // カードが表示されたら閲覧回数を+1する
   useEffect(() => {
-    if (current) {
-      setViewed((prev) => ({ ...prev, [current.front]: true }));
+    if (current && lastViewed.current !== current.front) {
+      setViewedCount((prev) => ({
+        ...prev,
+        [current.front]: (prev[current.front] || 0) + 1,
+      }));
+      lastViewed.current = current.front;
     }
   }, [current]);
+
+  // 現在のカードの閲覧回数を取得
+  const currentViewCount = current ? (viewedCount[current.front] || 0) : 0;
 
   const goTo = (nextIndex: number) => {
     if (!filteredCards.length) return;
@@ -89,13 +99,11 @@ export default function FlashcardWebPrototype() {
     const text = await file.text();
     const parsed = parseCsv(text);
     if (parsed.length) {
-      // 読み込んだカードに現在のカテゴリを付与
       const newCategoryCards = parsed.map((card) => ({
         ...card,
         category: selectedCategory,
       }));
 
-      // 他の科目のカードは残しつつ、現在の科目のカードを差し替える
       setCards((prev) => [
         ...prev.filter((card) => card.category !== selectedCategory),
         ...newCategoryCards,
@@ -111,8 +119,8 @@ export default function FlashcardWebPrototype() {
     <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8">
       <div className="mx-auto max-w-3xl space-y-5">
         <header className="space-y-2 text-center">
-          <p className="text-sm font-medium text-slate-500">フラッシュカード</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">テスト対策用</h1>
+          <p className="text-sm font-medium text-slate-500">Webで共有できる単語学習カード</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">フラッシュカード</h1>
           <p className="text-slate-600">カードをクリックすると答えが表示されます。科目ごとに学習が可能です。</p>
         </header>
 
@@ -126,6 +134,7 @@ export default function FlashcardWebPrototype() {
                 setIndex(0);
                 setFlipped(false);
                 setQuery("");
+                lastViewed.current = null; // タブ切り替え時にリセット
               }}
               className={`px-4 py-2 text-sm font-medium rounded-xl transition-all ${
                 selectedCategory === category
@@ -182,10 +191,15 @@ export default function FlashcardWebPrototype() {
                   >
                     {current && (
                       <>
-                        {/* 左上：既出（閲覧済み）の目印 */}
-                        {viewed[current.front] && (
-                          <div className="absolute top-4 left-4 inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                            <Eye className="h-3 w-3" /> 閲覧済
+                        {/* 左上：閲覧回数による成長バッジ */}
+                        {currentViewCount > 0 && (
+                          <div className={`absolute top-4 left-4 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md shadow-sm transition-colors ${
+                            currentViewCount >= 5 ? "bg-amber-100 text-amber-700 border border-amber-200" :
+                            currentViewCount >= 3 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                            "bg-slate-100 text-slate-500 border border-slate-200"
+                          }`}>
+                            {currentViewCount >= 5 ? <Sparkles className="h-3.5 w-3.5 text-amber-500" /> : <Eye className="h-3 w-3" />}
+                            {currentViewCount >= 5 ? `${currentViewCount}回目！頑張ってますね✨` : `${currentViewCount}回閲覧`}
                           </div>
                         )}
 
@@ -228,12 +242,12 @@ export default function FlashcardWebPrototype() {
               <button
                 className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
                 onClick={() => {
-                  // 現在の科目のカードだけをシャッフルする
                   const otherCategoryCards = cards.filter((card) => card.category !== selectedCategory);
                   const shuffled = shuffleArray(categoryCards);
                   setCards([...otherCategoryCards, ...shuffled]);
                   setIndex(0);
                   setFlipped(false);
+                  lastViewed.current = null; // シャッフル時にもカウントが正しく動くようにリセット
                 }}
                 disabled={!filteredCards.length}
               >

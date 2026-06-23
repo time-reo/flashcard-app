@@ -202,7 +202,11 @@ export default function FlashcardWebPrototype() {
                     animate={{ rotateY: 0, opacity: 1 }}
                     exit={{ rotateY: flipped ? 90 : -90, opacity: 0 }}
                     transition={{ duration: 0.22 }}
-                    className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-sm p-7"
+                    className={`absolute inset-0 flex items-center justify-center rounded-2xl border shadow-sm p-7 ${
+                      flipped
+                        ? "bg-blue-50 border-blue-200" // ほんのり青く、フチも青く
+                        : "bg-white border-slate-200"   // 白
+                    }`}
                   >
                     {current && (
                       <>
@@ -232,7 +236,7 @@ export default function FlashcardWebPrototype() {
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
                           {flipped ? "Answer" : "Question"}
                         </p>
-                        <p className="text-4xl md:text-5xl font-bold leading-tight">
+                        <p className="text-xl md:text-2xl font-bold leading-tight px-4 break-words">
                           {flipped ? current.back : current.front}
                         </p>
                         <p className="text-sm text-slate-500">クリックして反転</p>

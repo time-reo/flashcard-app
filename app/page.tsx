@@ -81,18 +81,16 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function FlashcardWebPrototype() {
   const [cards, setCards] = useState(initialCards);
-  // 初期カテゴリを「公共」に変更
   const [selectedCategory, setSelectedCategory] = useState<Category>("公共");
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Record<string, boolean>>({});
-  
-  // 閲覧回数を記録するステート（文字列：回数）
   const [viewedCount, setViewedCount] = useState<Record<string, number>>({});
-  // 直前に見たカードを記録して、連続でカウントアップするのを防ぐ
-  const lastViewed = useRef<string | null>(null);
-  
   const [query, setQuery] = useState("");
+  
+  // ジャンプ先の番号を入力するステート
+  const [jumpInput, setJumpInput] = useState("");
+  const lastViewed = useRef<string | null>(null);
 
   const categoryCards = useMemo(() => {
     return cards.filter((card) => card.category === selectedCategory);
@@ -113,7 +111,6 @@ export default function FlashcardWebPrototype() {
     return categoryCards.filter((card) => known[card.front]).length;
   }, [categoryCards, known]);
 
-  // カードが表示されたら閲覧回数を+1する
   useEffect(() => {
     if (current && lastViewed.current !== current.front) {
       setViewedCount((prev) => ({
@@ -124,12 +121,28 @@ export default function FlashcardWebPrototype() {
     }
   }, [current]);
 
-  // 現在のカードの閲覧回数を取得
   const currentViewCount = current ? (viewedCount[current.front] || 0) : 0;
 
   const goTo = (nextIndex: number) => {
     if (!filteredCards.length) return;
     setIndex((nextIndex + filteredCards.length) % filteredCards.length);
+    setFlipped(false);
+  };
+
+  // 指定したカード番号にジャンプする関数
+  const handleJump = () => {
+    const targetNum = parseInt(jumpInput, 10);
+    if (!isNaN(targetNum) && targetNum >= 1 && targetNum <= filteredCards.length) {
+      setIndex(targetNum - 1);
+      setFlipped(false);
+      setJumpInput(""); // 入力欄をクリア
+    }
+  };
+
+  // 10枚ごとのセットを切り替える関数
+  const handleSetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const setIdx = parseInt(e.target.value, 10);
+    setIndex(setIdx * 10);
     setFlipped(false);
   };
 
@@ -174,7 +187,7 @@ export default function FlashcardWebPrototype() {
                 setIndex(0);
                 setFlipped(false);
                 setQuery("");
-                lastViewed.current = null; // タブ切り替え時にリセット
+                lastViewed.current = null;
               }}
               className={`px-4 py-2 text-sm font-medium rounded-xl transition-all ${
                 selectedCategory === category
@@ -209,9 +222,58 @@ export default function FlashcardWebPrototype() {
               </label>
             </div>
 
-            <div className="flex justify-between text-sm text-slate-500">
-              <span>{filteredCards.length ? `${safeIndex + 1} / ${filteredCards.length}` : "0 / 0"}</span>
-              <span>覚えた: {knownCount} / {categoryCards.length}</span>
+            {/* 進捗・セット選択・番号ジャンプを一列にまとめたコントロールパネル */}
+            <div className="flex flex-wrap gap-3 items-center justify-between text-sm text-slate-500 bg-slate-50 border border-slate-100 p-3 rounded-xl">
+              <div className="flex gap-4">
+                <span>{filteredCards.length ? `${safeIndex + 1} / ${filteredCards.length}` : "0 / 0"}</span>
+                <span>覚えた: {knownCount} / {categoryCards.length}</span>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                {/* 10枚ごとのセット選択ドロップダウン（カードが11枚以上あるときだけ表示） */}
+                {filteredCards.length > 10 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-slate-400">セット:</span>
+                    <select
+                      value={Math.floor(safeIndex / 10)}
+                      onChange={handleSetChange}
+                      className="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer"
+                    >
+                      {Array.from({ length: Math.ceil(filteredCards.length / 10) }).map((_, i) => {
+                        const start = i * 10 + 1;
+                        const end = Math.min((i + 1) * 10, filteredCards.length);
+                        return (
+                          <option key={i} value={i}>
+                            {start} 〜 {end} 番
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+
+                {/* 番号指定ジャンプ（カードがあるときだけ表示） */}
+                {filteredCards.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={1}
+                      max={filteredCards.length}
+                      placeholder="番号"
+                      value={jumpInput}
+                      onChange={(e) => setJumpInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleJump()}
+                      className="w-14 bg-white border border-slate-200 rounded-lg p-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-slate-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      onClick={handleJump}
+                      className="bg-slate-800 text-white px-2.5 py-1 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors"
+                    >
+                      移動
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <button
@@ -228,9 +290,7 @@ export default function FlashcardWebPrototype() {
                     exit={{ rotateY: flipped ? 90 : -90, opacity: 0 }}
                     transition={{ duration: 0.22 }}
                     className={`absolute inset-0 flex items-center justify-center rounded-2xl border shadow-sm p-7 ${
-                      flipped
-                        ? "bg-blue-50 border-blue-200" // ほんのり青く、フチも青く
-                        : "bg-white border-slate-200"   // 白
+                      flipped ? "bg-blue-50 border-blue-200" : "bg-white border-slate-200"
                     }`}
                   >
                     {current && (
@@ -257,7 +317,7 @@ export default function FlashcardWebPrototype() {
                     )}
 
                     {current ? (
-                      <div className="text-center space-y-4">
+                      <div className="text-center space-y-4 w-full">
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
                           {flipped ? "Answer" : "Question"}
                         </p>
@@ -291,7 +351,7 @@ export default function FlashcardWebPrototype() {
                   setCards([...otherCategoryCards, ...shuffled]);
                   setIndex(0);
                   setFlipped(false);
-                  lastViewed.current = null; // シャッフル時にもカウントが正しく動くようにリセット
+                  lastViewed.current = null;
                 }}
                 disabled={!filteredCards.length}
               >

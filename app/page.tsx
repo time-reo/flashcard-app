@@ -51,7 +51,56 @@ const initialCards = [
   { front: "自分一人では生活できない家族を助けて養うこと", back: "扶養", category: "家庭" as Category },
   { front: "亡くなった人のお金や家などの財産を家族が引き継ぐこと", back: "相続", category: "家庭" as Category },
   { front: "「仕事」と「プライベートの時間」のバランスを良くしてどちらも充実させること", back: "ワーク・ライフ・バランス", category: "家庭" as Category },
-  { front: "自然界の4つの基本相互作用", back: "重力、電磁気力、強い力、弱い力", category: "科人" as Category },
+// D 免疫
+{ front: "病原体などの異物の侵入を防いだり、侵入した異物を除去したりする体のしくみを何というか", back: "生体防御", category: "科人" as Category },
+{ front: "ヒトの皮膚の最外層をおおう、死んだ細胞の層を何というか", back: "角質", category: "科人" as Category },
+{ front: "汗などにふくまれ、細菌を殺すはたらきをもつものは何か", back: "酵素", category: "科人" as Category },
+{ front: "気管や消化管などの粘膜が分泌し、異物の侵入を防いだり排出したりするものは何か", back: "粘液", category: "科人" as Category },
+{ front: "冬に病気に感染しやすくなる原因の1つとして考えられていることは何か", back: "乾燥により粘液などのはたらきが弱まること", category: "科人" as Category },
+{ front: "体内に侵入した異物を非自己として認識して除去するしくみを何というか", back: "免疫", category: "科人" as Category },
+{ front: "免疫でおもにはたらく血液の成分は何か", back: "白血球", category: "科人" as Category },
+{ front: "がんに対する免疫の活動を活発にしてがんを治療する方法を何というか", back: "免疫療法", category: "科人" as Category },
+
+// 1 免疫のしくみ
+{ front: "体内に侵入した異物を直接とりこみ、分解して排除する白血球の一種は何か", back: "マクロファージ", category: "科人" as Category },
+{ front: "抗体をつくらせる原因となる物質を何というか", back: "抗原", category: "科人" as Category },
+{ front: "異物が抗原として認識されると活性化し、抗体を産生する白血球の一種は何か", back: "B細胞", category: "科人" as Category },
+{ front: "抗原を認識して結合するタンパク質を何というか", back: "抗体", category: "科人" as Category },
+{ front: "抗体が特定の抗原に結合することを何というか", back: "抗原抗体反応", category: "科人" as Category },
+
+// 一次応答と二次応答
+{ front: "はじめての異物が侵入したとき、抗体がつくられはじめるまでにかかる期間はどれくらいか", back: "1〜2週間", category: "科人" as Category },
+{ front: "はじめて異物が侵入したときに起こる、抗体産生までに時間がかかる免疫反応を何というか", back: "一次応答", category: "科人" as Category },
+{ front: "一次応答で活性化したB細胞などの一部が体内に残ったものを何というか", back: "記憶細胞", category: "科人" as Category },
+{ front: "同じ抗原に再び出会ったとき、記憶細胞によって抗体が急速かつ大量に産生される反応を何というか", back: "二次応答", category: "科人" as Category },
+{ front: "病原体やその情報が集められ、免疫反応が起こる場となるところはどこか", back: "リンパ節", category: "科人" as Category },
+
+// コラム：血液型の判定
+{ front: "異なる型の血液を混ぜると血液にかたまりができるのは、何という反応によるものか", back: "抗原抗体反応", category: "科人" as Category },
+{ front: "血液型の判定で、抗原Aに対する抗体でのみ血液がかたまった場合、何型と判定されるか", back: "A型", category: "科人" as Category },
+
+// 2 ワクチン
+{ front: "二次応答のしくみを利用して、病気にかかりにくくするものは何か", back: "予防接種", category: "科人" as Category },
+{ front: "予防接種で接種する抗原などを何というか", back: "ワクチン", category: "科人" as Category },
+{ front: "ワクチンにはどのようなものが用いられるか", back: "弱毒化したウイルスや、細菌のもつタンパク質を抽出したものなど", category: "科人" as Category },
+{ front: "ワクチン接種によって世界中で根絶された感染症は何か", back: "天然痘", category: "科人" as Category },
+{ front: "WHOとは何の略称か", back: "世界保健機関", category: "科人" as Category },
+
+// コラム：インフルエンザとワクチン
+{ front: "抗原となる部分の性質が大きく変わったウイルスを何というか", back: "新型ウイルス", category: "科人" as Category },
+{ front: "新型ウイルスによって起こることがある、感染症の世界的大流行を何というか", back: "パンデミック", category: "科人" as Category },
+{ front: "1918年に流行し、約4000万人が死亡した新型インフルエンザを何というか", back: "スペイン風邪", category: "科人" as Category },
+{ front: "新型コロナウイルスワクチンの主流は何ワクチンか", back: "RNAワクチン（mRNAワクチン）", category: "科人" as Category },
+
+// 3 アレルギー
+{ front: "免疫応答が過敏に起こり、体に不都合な影響を与える反応を何というか", back: "アレルギー", category: "科人" as Category },
+{ front: "アレルギーの原因となる抗原を何というか", back: "アレルゲン", category: "科人" as Category },
+{ front: "食物、ハチ毒、薬などが原因で起こる急性アレルギー反応を何というか", back: "アナフィラキシー", category: "科人" as Category },
+{ front: "アナフィラキシーの重篤な状態で、死にいたることもあるものを何というか", back: "アナフィラキシーショック", category: "科人" as Category },
+
+// コラム：花粉症のしくみと対処法
+{ front: "スギやヒノキなどの花粉を吸入することで起こるアレルギー性疾患を何というか", back: "花粉症", category: "科人" as Category },
+{ front: "抗原をごく微量ずつ投与し、抗原に対する反応を弱めていく治療法を何というか", back: "減感作療法", category: "科人" as Category },
   { front: "情報のデジタル化のメリット", back: "ノイズに強く、劣化せずに複製・伝送ができること", category: "情１" as Category },
 ];
 
